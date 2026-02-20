@@ -1,0 +1,50 @@
+name: Weekly Job Scraper
+
+on:
+  # Runs every Monday at 9:00 AM Eastern (14:00 UTC)
+  schedule:
+    - cron: "0 14 * * 1"
+
+  # Manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Profile to run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - "1"
+          - "2"
+          - "3"
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run job scraper
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'all' }}"
+          python job_scraper.py --profile "$PROFILE"
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: job-results-${{ github.run_number }}
+          path: results/
+          retention-days: 30
