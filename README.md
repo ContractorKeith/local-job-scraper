@@ -203,7 +203,7 @@ Each JSON result file contains:
 
 ```json
 {
-  "profile": "Fence & Gate — Commercial Estimator Focus",
+  "profile": "Outside Sales — Technology & Software",
   "location": "Austin, TX",
   "run_date": "2026-02-20 09:00",
   "summary": {
