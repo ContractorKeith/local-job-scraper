@@ -1,7 +1,46 @@
-# Repo instructions for Codex and other non-Claude agents
+# local-job-scraper — Agent Instructions
 
-**All repo instructions live in [CLAUDE.md](CLAUDE.md). Read that file in full and follow it.** Where it says "Claude", read it as "you" (the agent working in this repo). Layout, run commands, and constraints apply verbatim regardless of which agent you are.
+Python tool that searches company websites directly for job openings (not job boards): finds
+companies via the Google Places API (New), checks their sites for a careers page (18 URL patterns +
+homepage link scanning), and scans it for target job keywords. Runs weekly via GitHub Actions.
+MIT-licensed, public repo.
 
-Do not maintain a separate copy of the instructions here. A single source of truth prevents the two files from drifting apart.
+## Layout
 
-Non-Claude note: the `@~/.claude/rules-python/*.md` import lines at the bottom of CLAUDE.md are Claude Code syntax. If your harness doesn't expand them, read those files directly — they are plain markdown coding/testing/security rules for this Python repo.
+- `job_scraper.py` — all logic (single script; interactive menu + `--profile` CLI)
+- `config.py` — the ONLY file users edit: location lat/lng, radius, job profiles (`place_searches` + `job_keywords`)
+- `.github/workflows/weekly_scraper.yml` — Monday cron (UTC), uploads results as artifacts
+- `requirements.txt` — requests, beautifulsoup4, python-dotenv
+
+## Run
+
+```bash
+pip install -r requirements.txt
+cp .env.example .env        # set GOOGLE_PLACES_API_KEY
+python job_scraper.py                 # interactive menu
+python job_scraper.py --profile 1     # one profile
+python job_scraper.py --profile all
+```
+
+Results land in `results/` as JSON (three buckets: keyword matches, has careers page, no careers
+page). No test suite exists.
+
+## Constraints
+
+- Keep `config.py` the single place users customize — don't scatter settings into `job_scraper.py`
+- Never commit `.env` or API keys; in CI the key comes from the `GOOGLE_PLACES_API_KEY` repo secret
+- Results are intentionally not committed to the repo (artifacts only)
+- Python 3.8+ compatibility (per README prerequisites)
+- Use `logging`, not `print()` (script already configures a logger)
+
+## Python rules
+
+Follow the shared Python rules in `~/.claude/rules-python/` (coding-style, testing,
+patterns, security, hooks). Claude expands the imports below; other agents read the
+files directly.
+
+@~/.claude/rules-python/coding-style.md
+@~/.claude/rules-python/testing.md
+@~/.claude/rules-python/patterns.md
+@~/.claude/rules-python/security.md
+@~/.claude/rules-python/hooks.md
